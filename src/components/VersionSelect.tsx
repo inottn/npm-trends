@@ -42,7 +42,15 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
   }, [options, value]);
 
   return (
-    <div className={`relative ${className}`} ref={wrapperRef}>
+    <div
+      className={`relative ${className}`}
+      ref={wrapperRef}
+      onBlur={(e) => {
+        if (!wrapperRef.current?.contains(e.relatedTarget as Node)) {
+          setIsOpen(false);
+        }
+      }}
+    >
       <div className="relative group">
         <input
           type="text"
@@ -66,6 +74,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
         <div
           className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-900 border border-black dark:border-neutral-500 shadow-none overflow-y-auto animate-in fade-in duration-100"
           style={{ maxHeight: MAX_DROPDOWN_HEIGHT }}
+          onMouseDown={(e) => e.preventDefault()}
         >
           {filteredOptions.length === 0 ? (
             <div className="px-3 py-2 text-xs text-neutral-400 dark:text-neutral-500 text-center">
