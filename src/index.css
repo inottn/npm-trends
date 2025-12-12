@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "sans-serif";
+
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+  --color-neutral-950: #030712;
+
+  --color-accent: #0044cc;
+  --color-accent-hover: #003399;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+html {
+  font-size: 14px;
+}
+
+button {
+  cursor: pointer;
+}
