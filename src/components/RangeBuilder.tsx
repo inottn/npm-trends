@@ -127,11 +127,25 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
       isMax: isNewMax,
     };
 
-    // Replace selected items with the new merged item
-    const newRanges = ranges.filter((r) => !selectedIds.includes(r.id));
-    newRanges.push(mergedRange);
+    // Find the index of the last selected item
+    let lastSelectedIndex = -1;
+    ranges.forEach((r, index) => {
+      if (selectedIds.includes(r.id)) {
+        lastSelectedIndex = index;
+      }
+    });
 
-    onChange([...newRanges]);
+    // Construct new ranges list
+    const newRanges = ranges.reduce<VersionRange[]>((acc, r, index) => {
+      if (index === lastSelectedIndex) {
+        acc.push(mergedRange);
+      } else if (!selectedIds.includes(r.id)) {
+        acc.push(r);
+      }
+      return acc;
+    }, []);
+
+    onChange(newRanges);
     setSelectedIds([]); // Clear selection
   };
 
