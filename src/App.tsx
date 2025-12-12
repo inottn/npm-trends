@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, ArrowRight, TrendingUp, AlertTriangle, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -5,6 +6,7 @@ import type { VersionRange, AnalysisState, RangeResult } from "./types";
 
 import RangeBuilder from "./components/RangeBuilder";
 import StatsChart from "./components/StatsChart";
+import { npmKeys } from "./hooks/useNpm";
 import { dictionary, type Language } from "./services/i18n";
 import { getAllVersions, getVersionDownloads, semver } from "./services/npm";
 
@@ -14,15 +16,12 @@ const DEFAULT_RANGES: VersionRange[] = [];
 type Theme = "light" | "dark";
 
 export default function App() {
+  const queryClient = useQueryClient();
   const [lang, setLang] = useState<Language>("en");
   const [theme, setTheme] = useState<Theme>("light");
   const t = dictionary[lang];
 
   const [ranges, setRanges] = useState<VersionRange[]>(DEFAULT_RANGES);
-
-  // Cache stores versions for each package to avoid refetching
-  const [versionCache, setVersionCache] = useState<Record<string, string[]>>({});
-  const [loadingPackages, setLoadingPackages] = useState<Record<string, boolean>>({});
 
   const [state, setState] = useState<AnalysisState>({
     status: "idle",
@@ -44,22 +43,6 @@ export default function App() {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  const fetchVersionsForPackage = async (pkgName: string): Promise<string[] | undefined> => {
-    if (!pkgName || versionCache[pkgName] || loadingPackages[pkgName]) return versionCache[pkgName];
-
-    setLoadingPackages((prev) => ({ ...prev, [pkgName]: true }));
-    try {
-      const vers = await getAllVersions(pkgName);
-      setVersionCache((prev) => ({ ...prev, [pkgName]: vers }));
-      return vers;
-    } catch (e) {
-      console.error(`Failed to load versions for ${pkgName}`, e);
-      return [];
-    } finally {
-      setLoadingPackages((prev) => ({ ...prev, [pkgName]: false }));
-    }
-  };
-
   const cleanVer = (v: string) => {
     const cleaned = semver.clean(v);
     if (cleaned) return cleaned;
@@ -77,11 +60,17 @@ export default function App() {
     if (!trimmedName) return;
 
     // Ensure we have versions
-    let versions: string[] = versionCache[trimmedName] || [];
-    if (versions.length === 0) {
-      const fetched = await fetchVersionsForPackage(trimmedName);
-      if (fetched) versions = fetched;
+    let versions: string[] = [];
+    try {
+      versions = await queryClient.ensureQueryData({
+        queryKey: npmKeys.versions(trimmedName),
+        queryFn: () => getAllVersions(trimmedName),
+      });
+    } catch (e) {
+      console.error(`Failed to load versions for ${trimmedName}`, e);
+      return;
     }
+
     if (versions.length === 0) return; // Could not fetch
 
     const newRanges: VersionRange[] = [];
@@ -166,9 +155,14 @@ export default function App() {
       // 2. Fetch data for all packages in parallel
       const packageDataPromises = uniquePackages.map(async (pkg) => {
         const [versions, downloads] = await Promise.all([
-          // Use cache if available, else fetch
-          versionCache[pkg] ? Promise.resolve(versionCache[pkg]) : getAllVersions(pkg),
-          getVersionDownloads(pkg),
+          queryClient.ensureQueryData({
+            queryKey: npmKeys.versions(pkg),
+            queryFn: () => getAllVersions(pkg),
+          }),
+          queryClient.ensureQueryData({
+            queryKey: npmKeys.downloads(pkg),
+            queryFn: () => getVersionDownloads(pkg),
+          }),
         ]);
         return { pkg, versions, downloads };
       });
@@ -182,10 +176,6 @@ export default function App() {
           versions: item.versions,
           downloads: item.downloads,
         };
-        // Update cache if we fetched new versions
-        if (!versionCache[item.pkg]) {
-          setVersionCache((prev) => ({ ...prev, [item.pkg]: item.versions }));
-        }
       });
 
       // 3. Process each range against its package data
@@ -346,9 +336,6 @@ export default function App() {
               <RangeBuilder
                 ranges={ranges}
                 onChange={setRanges}
-                versionCache={versionCache}
-                loadingPackages={loadingPackages}
-                onPackageBlur={(id, name) => fetchVersionsForPackage(name)}
                 onQuickAdd={handleQuickAdd}
                 disabled={state.status === "loading"}
                 translations={t}

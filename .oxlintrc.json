@@ -7,14 +7,10 @@
   "env": {
     "builtin": true
   },
-  "ignorePatterns": [
-    "dist"
-  ],
+  "ignorePatterns": ["dist"],
   "overrides": [
     {
-      "files": [
-        "**/*.{ts,tsx}"
-      ],
+      "files": ["**/*.{ts,tsx}"],
       "rules": {
         "for-direction": "error",
         "no-async-promise-executor": "error",
@@ -74,22 +70,10 @@
     },
     {
       "files": [
-        [
-          "**/*.{ts,tsx}",
-          "**/*.ts"
-        ],
-        [
-          "**/*.{ts,tsx}",
-          "**/*.tsx"
-        ],
-        [
-          "**/*.{ts,tsx}",
-          "**/*.mts"
-        ],
-        [
-          "**/*.{ts,tsx}",
-          "**/*.cts"
-        ]
+        ["**/*.{ts,tsx}", "**/*.ts"],
+        ["**/*.{ts,tsx}", "**/*.tsx"],
+        ["**/*.{ts,tsx}", "**/*.mts"],
+        ["**/*.{ts,tsx}", "**/*.cts"]
       ],
       "rules": {
         "no-class-assign": "off",
@@ -111,9 +95,7 @@
       }
     },
     {
-      "files": [
-        "**/*.{ts,tsx}"
-      ],
+      "files": ["**/*.{ts,tsx}"],
       "rules": {
         "@typescript-eslint/ban-ts-comment": "error",
         "no-array-constructor": "error",
@@ -136,26 +118,18 @@
         "@typescript-eslint/prefer-namespace-keyword": "error",
         "@typescript-eslint/triple-slash-reference": "error"
       },
-      "plugins": [
-        "typescript"
-      ]
+      "plugins": ["typescript"]
     },
     {
-      "files": [
-        "**/*.{ts,tsx}"
-      ],
+      "files": ["**/*.{ts,tsx}"],
       "rules": {
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn"
       },
-      "plugins": [
-        "react"
-      ]
+      "plugins": ["react"]
     },
     {
-      "files": [
-        "**/*.{ts,tsx}"
-      ],
+      "files": ["**/*.{ts,tsx}"],
       "env": {
         "es2020": true,
         "browser": true
