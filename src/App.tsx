@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Loader2, ArrowRight, TrendingUp, AlertTriangle, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
+import semver from "semver";
 
 import type { VersionRange, AnalysisState, RangeResult } from "./types";
 
@@ -9,7 +10,7 @@ import RangeBuilder from "./components/RangeBuilder";
 import StatsChart from "./components/StatsChart";
 import { npmKeys } from "./hooks/useNpm";
 import { dictionary, type Language } from "./services/i18n";
-import { getAllVersions, getVersionDownloads, semver } from "./services/npm";
+import { getAllVersions, getVersionDownloads } from "./services/npm";
 
 // Removed default values as requested
 const DEFAULT_RANGES: VersionRange[] = [];

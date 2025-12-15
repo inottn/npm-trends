@@ -1,8 +1,8 @@
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
 import { Trash2, ArrowRight, Loader2, CheckSquare, Square, GripVertical } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 import type { Translation } from "../services/i18n";
 import type { VersionRange } from "../types";

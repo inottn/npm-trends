@@ -1,6 +1,3 @@
-import clsx from "clsx";
-import { Plus, Trash2, Loader2, ChevronDown, Merge } from "lucide-react";
-import React, { useState, useMemo } from "react";
 import {
   DndContext,
   closestCenter,
@@ -16,11 +13,14 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import clsx from "clsx";
+import { Plus, Trash2, Loader2, ChevronDown, Merge } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import semver from "semver";
 
 import type { Translation } from "../services/i18n";
 import type { VersionRange } from "../types";
 
-import { semver } from "../services/npm";
 import RangeRow from "./RangeRow";
 
 interface RangeBuilderProps {

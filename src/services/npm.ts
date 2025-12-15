@@ -54,5 +54,3 @@ export async function getVersionDownloads(pkgName: string): Promise<Record<strin
     throw error;
   }
 }
-
-export { semver };
