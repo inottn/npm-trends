@@ -1,6 +1,8 @@
 import clsx from "clsx";
-import { Trash2, ArrowRight, Loader2, CheckSquare, Square } from "lucide-react";
+import { Trash2, ArrowRight, Loader2, CheckSquare, Square, GripVertical } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import type { Translation } from "../services/i18n";
 import type { VersionRange } from "../types";
@@ -43,18 +45,46 @@ const RangeRow: React.FC<RangeRowProps> = ({
 
   const { data: versions = [], isLoading } = usePackageVersions(queryPkg);
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: range.id,
+    disabled: disabled,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       className={clsx(
         "group p-4 relative transition-colors duration-300",
         isSelected
           ? "bg-neutral-100 dark:bg-neutral-900"
           : "bg-white dark:bg-neutral-950 hover:bg-neutral-50 dark:hover:bg-neutral-900",
+        isDragging && "opacity-50 z-50",
       )}
     >
       <div className="flex gap-3">
-        {/* Checkbox Column */}
-        <div className="pt-1 shrink-0">
+        {/* Drag Handle & Checkbox Column */}
+        <div className="pt-1 shrink-0 flex gap-2">
+          <button
+            {...attributes}
+            {...listeners}
+            disabled={disabled}
+            className={clsx(
+              "touch-none transition-colors duration-200 rounded-sm",
+              disabled
+                ? "text-neutral-200 dark:text-neutral-800 cursor-not-allowed"
+                : "text-neutral-300 dark:text-neutral-700 hover:text-neutral-500 dark:hover:text-neutral-400 cursor-grab active:cursor-grabbing",
+              focusClass,
+            )}
+            title="Drag to reorder"
+          >
+            <GripVertical size={16} />
+          </button>
           <button
             onClick={() => !disabled && onToggleSelect(range.id)}
             disabled={disabled}

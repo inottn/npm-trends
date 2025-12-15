@@ -1,6 +1,21 @@
 import clsx from "clsx";
 import { Plus, Trash2, Loader2, ChevronDown, Merge } from "lucide-react";
 import React, { useState, useMemo } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 import type { Translation } from "../services/i18n";
 import type { VersionRange } from "../types";
@@ -31,6 +46,26 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [showMinorsMenu, setShowMinorsMenu] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = ranges.findIndex((r) => r.id === active.id);
+      const newIndex = ranges.findIndex((r) => r.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onChange(arrayMove(ranges, oldIndex, newIndex));
+      }
+    }
+  };
 
   const addRange = () => {
     const newId = Math.random().toString(36).substring(7);
@@ -242,19 +277,27 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
             {t.noRanges}
           </div>
         ) : (
-          ranges.map((range) => (
-            <RangeRow
-              key={range.id}
-              range={range}
-              isSelected={selectedIds.includes(range.id)}
-              onUpdate={updateRange}
-              onRemove={removeRange}
-              onToggleSelect={toggleSelection}
-              disabled={disabled}
-              translations={t}
-              focusClass={focusClass}
-            />
-          ))
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={ranges.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+              {ranges.map((range) => (
+                <RangeRow
+                  key={range.id}
+                  range={range}
+                  isSelected={selectedIds.includes(range.id)}
+                  onUpdate={updateRange}
+                  onRemove={removeRange}
+                  onToggleSelect={toggleSelection}
+                  disabled={disabled}
+                  translations={t}
+                  focusClass={focusClass}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 
