@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { Plus, Trash2, Loader2, ChevronDown, Merge } from "lucide-react";
 import React, { useState, useMemo } from "react";
 
@@ -175,7 +176,10 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
           <button
             onClick={() => handleQuickGenerator("majors")}
             disabled={disabled || !quickPackage || !!isGenerating}
-            className={`h-8 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 enabled:hover:border-black enabled:dark:hover:border-white text-neutral-700 dark:text-neutral-300 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${focusClass}`}
+            className={clsx(
+              "h-8 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 enabled:hover:border-black enabled:dark:hover:border-white text-neutral-700 dark:text-neutral-300 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
+              focusClass,
+            )}
           >
             {isGenerating === "majors" ? <Loader2 size={12} className="animate-spin" /> : t.byMajor}
           </button>
@@ -188,7 +192,10 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
             <button
               onClick={() => handleQuickGenerator("minors", 5)}
               disabled={disabled || !quickPackage || !!isGenerating}
-              className={`w-full h-8 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 enabled:hover:border-black enabled:dark:hover:border-white text-neutral-700 dark:text-neutral-300 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${focusClass}`}
+              className={clsx(
+                "w-full h-8 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 enabled:hover:border-black enabled:dark:hover:border-white text-neutral-700 dark:text-neutral-300 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
+                focusClass,
+              )}
             >
               {isGenerating === "minors" ? (
                 <Loader2 size={12} className="animate-spin" />
@@ -256,7 +263,10 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
         <button
           onClick={addRange}
           disabled={disabled}
-          className={`flex-1 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 enabled:hover:border-black enabled:dark:hover:border-white enabled:hover:text-black enabled:dark:hover:text-white text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${focusClass}`}
+          className={clsx(
+            "flex-1 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 enabled:hover:border-black enabled:dark:hover:border-white enabled:hover:text-black enabled:dark:hover:text-white text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
+            focusClass,
+          )}
         >
           <Plus size={14} />
           {t.addRow}
@@ -266,7 +276,10 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
           onClick={mergeSelected}
           disabled={disabled || !canMerge}
           title={canMerge ? "" : t.mergeError}
-          className={`px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500 enabled:hover:border-accent enabled:dark:hover:border-blue-400 enabled:hover:text-accent enabled:dark:hover:text-blue-400 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed ${focusClass}`}
+          className={clsx(
+            "px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500 enabled:hover:border-accent enabled:dark:hover:border-blue-400 enabled:hover:text-accent enabled:dark:hover:text-blue-400 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed",
+            focusClass,
+          )}
         >
           <Merge size={14} />
           <span className="hidden sm:inline">{t.mergeBtn}</span>
@@ -278,7 +291,10 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
             setSelectedIds([]);
           }}
           disabled={disabled || ranges.length === 0}
-          className={`px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500 enabled:hover:border-red-600 enabled:dark:hover:border-red-500 enabled:hover:text-red-600 enabled:dark:hover:text-red-500 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${focusClass}`}
+          className={clsx(
+            "px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500 enabled:hover:border-red-600 enabled:dark:hover:border-red-500 enabled:hover:text-red-600 enabled:dark:hover:text-red-500 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed",
+            focusClass,
+          )}
           title={t.reset}
         >
           <Trash2 size={14} />

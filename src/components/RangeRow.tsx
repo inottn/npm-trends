@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { Trash2, ArrowRight, Loader2, CheckSquare, Square } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
@@ -44,11 +45,12 @@ const RangeRow: React.FC<RangeRowProps> = ({
 
   return (
     <div
-      className={`group p-4 relative transition-colors duration-300 ${
+      className={clsx(
+        "group p-4 relative transition-colors duration-300",
         isSelected
           ? "bg-neutral-100 dark:bg-neutral-900"
-          : "bg-white dark:bg-neutral-950 hover:bg-neutral-50 dark:hover:bg-neutral-900"
-      }`}
+          : "bg-white dark:bg-neutral-950 hover:bg-neutral-50 dark:hover:bg-neutral-900",
+      )}
     >
       <div className="flex gap-3">
         {/* Checkbox Column */}
@@ -56,11 +58,13 @@ const RangeRow: React.FC<RangeRowProps> = ({
           <button
             onClick={() => !disabled && onToggleSelect(range.id)}
             disabled={disabled}
-            className={`transition-colors duration-200 rounded-sm ${
+            className={clsx(
+              "transition-colors duration-200 rounded-sm",
               isSelected
                 ? "text-black dark:text-white"
-                : "text-neutral-300 dark:text-neutral-700 hover:text-neutral-500 dark:hover:text-neutral-500"
-            } ${focusClass}`}
+                : "text-neutral-300 dark:text-neutral-700 hover:text-neutral-500 dark:hover:text-neutral-500",
+              focusClass,
+            )}
           >
             {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
           </button>
@@ -98,11 +102,13 @@ const RangeRow: React.FC<RangeRowProps> = ({
               <div
                 role="button"
                 tabIndex={disabled ? -1 : 0}
-                className={`h-8 border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider transition-colors duration-300 ${
+                className={clsx(
+                  "h-8 border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider transition-colors duration-300",
                   disabled
                     ? "opacity-50 cursor-not-allowed pointer-events-none"
-                    : "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white"
-                } ${focusClass}`}
+                    : "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white",
+                  focusClass,
+                )}
                 onClick={() => !disabled && onUpdate(range.id, { isMin: false })}
                 onKeyDown={(e) => {
                   if (!disabled && (e.key === "Enter" || e.key === " ")) {
@@ -138,7 +144,10 @@ const RangeRow: React.FC<RangeRowProps> = ({
                       })
                     }
                     disabled={disabled}
-                    className={`text-[9px] font-semibold text-neutral-400 dark:text-neutral-500 enabled:hover:text-accent enabled:dark:hover:text-white enabled:hover:underline uppercase tracking-wider transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${focusClass}`}
+                    className={clsx(
+                      "text-[9px] font-semibold text-neutral-400 dark:text-neutral-500 enabled:hover:text-accent enabled:dark:hover:text-white enabled:hover:underline uppercase tracking-wider transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed",
+                      focusClass,
+                    )}
                   >
                     {t.setToMin}
                   </button>
@@ -158,11 +167,13 @@ const RangeRow: React.FC<RangeRowProps> = ({
               <div
                 role="button"
                 tabIndex={disabled ? -1 : 0}
-                className={`h-8 border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider transition-colors duration-300 ${
+                className={clsx(
+                  "h-8 border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider transition-colors duration-300",
                   disabled
                     ? "opacity-50 cursor-not-allowed pointer-events-none"
-                    : "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white"
-                } ${focusClass}`}
+                    : "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white",
+                  focusClass,
+                )}
                 onClick={() => !disabled && onUpdate(range.id, { isMax: false })}
                 onKeyDown={(e) => {
                   if (!disabled && (e.key === "Enter" || e.key === " ")) {
@@ -188,7 +199,10 @@ const RangeRow: React.FC<RangeRowProps> = ({
                   <button
                     onClick={() => onUpdate(range.id, { isMax: true, end: "" })}
                     disabled={disabled}
-                    className={`text-[9px] font-semibold text-neutral-400 dark:text-neutral-500 enabled:hover:text-accent enabled:dark:hover:text-white enabled:hover:underline uppercase tracking-wider transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${focusClass}`}
+                    className={clsx(
+                      "text-[9px] font-semibold text-neutral-400 dark:text-neutral-500 enabled:hover:text-accent enabled:dark:hover:text-white enabled:hover:underline uppercase tracking-wider transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed",
+                      focusClass,
+                    )}
                   >
                     {t.setToMax}
                   </button>
@@ -202,7 +216,10 @@ const RangeRow: React.FC<RangeRowProps> = ({
             <button
               onClick={() => onRemove(range.id)}
               disabled={disabled}
-              className={`text-neutral-300 dark:text-neutral-600 enabled:hover:text-black enabled:dark:hover:text-white transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm ${focusClass}`}
+              className={clsx(
+                "text-neutral-300 dark:text-neutral-600 enabled:hover:text-black enabled:dark:hover:text-white transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm",
+                focusClass,
+              )}
             >
               <Trash2 size={14} />
             </button>

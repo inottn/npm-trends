@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { ChevronDown, Check } from "lucide-react";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 
@@ -43,7 +44,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
 
   return (
     <div
-      className={`relative ${className}`}
+      className={clsx("relative", className)}
       ref={wrapperRef}
       onBlur={(e) => {
         if (!wrapperRef.current?.contains(e.relatedTarget as Node)) {
@@ -90,11 +91,12 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
                     onChange(ver);
                     setIsOpen(false);
                   }}
-                  className={`px-3 py-2 flex items-center justify-between text-xs cursor-pointer transition-colors duration-300 border-b border-neutral-100 dark:border-neutral-800 last:border-0 ${
+                  className={clsx(
+                    "px-3 py-2 flex items-center justify-between text-xs cursor-pointer transition-colors duration-300 border-b border-neutral-100 dark:border-neutral-800 last:border-0",
                     isSelected
                       ? "bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white font-bold"
-                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white"
-                  }`}
+                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white",
+                  )}
                 >
                   <span className="truncate font-mono">{ver}</span>
                   {isSelected && (

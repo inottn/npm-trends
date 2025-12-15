@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import clsx from "clsx";
 import { Loader2, ArrowRight, TrendingUp, AlertTriangle, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -289,7 +290,10 @@ export default function App() {
             {/* Theme Switcher */}
             <button
               onClick={toggleTheme}
-              className={`text-neutral-400 hover:text-black dark:hover:text-white transition-colors duration-300 p-1 ${focusClass}`}
+              className={clsx(
+                "text-neutral-400 hover:text-black dark:hover:text-white transition-colors duration-300 p-1",
+                focusClass,
+              )}
               title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
             >
               {theme === "light" ? (

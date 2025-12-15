@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { PieChart as PieIcon, BarChart2 } from "lucide-react";
 import React, { useState } from "react";
 import {
@@ -68,22 +69,26 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
         <div className="flex gap-1">
           <button
             onClick={() => setChartType("bar")}
-            className={`p-2 border transition-colors duration-300 ${focusClass} focus-visible:z-10 ${
+            className={clsx(
+              "p-2 border transition-colors duration-300 focus-visible:z-10",
+              focusClass,
               chartType === "bar"
                 ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white"
-                : "bg-white text-neutral-500 border-neutral-200 hover:border-neutral-400 dark:bg-neutral-900 dark:text-neutral-400 dark:border-neutral-700 dark:hover:border-neutral-500"
-            }`}
+                : "bg-white text-neutral-500 border-neutral-200 hover:border-neutral-400 dark:bg-neutral-900 dark:text-neutral-400 dark:border-neutral-700 dark:hover:border-neutral-500",
+            )}
             title="Bar Chart"
           >
             <BarChart2 size={14} />
           </button>
           <button
             onClick={() => setChartType("pie")}
-            className={`p-2 border transition-colors duration-300 ${focusClass} focus-visible:z-10 ${
+            className={clsx(
+              "p-2 border transition-colors duration-300 focus-visible:z-10",
+              focusClass,
               chartType === "pie"
                 ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white"
-                : "bg-white text-neutral-500 border-neutral-200 hover:border-neutral-400 dark:bg-neutral-900 dark:text-neutral-400 dark:border-neutral-700 dark:hover:border-neutral-500"
-            }`}
+                : "bg-white text-neutral-500 border-neutral-200 hover:border-neutral-400 dark:bg-neutral-900 dark:text-neutral-400 dark:border-neutral-700 dark:hover:border-neutral-500",
+            )}
             title="Pie Chart"
           >
             <PieIcon size={14} />
@@ -92,7 +97,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
       </div>
 
       <div
-        className={`w-full h-[320px] ${focusClass}`}
+        className={clsx("w-full h-[320px]", focusClass)}
         tabIndex={0}
         aria-label="Chart area. Use arrow keys to explore if supported, or view data table below."
       >
