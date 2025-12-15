@@ -17,6 +17,7 @@ import {
 
 import type { Translation } from "../services/i18n";
 import type { RangeResult } from "../types";
+import ChartLegend from "./ChartLegend";
 
 interface StatsChartProps {
   data: RangeResult[];
@@ -32,6 +33,7 @@ const COLORS = ["#171717", "#2563eb", "#dc2626", "#ca8a04", "#4b5563", "#9333ea"
 
 const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme }) => {
   const [chartType, setChartType] = useState<"bar" | "pie">("bar");
+  const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
 
   if (data.length === 0) return null;
 
@@ -40,6 +42,22 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
     ...d,
     fullLabel: `${d.packageName} ${d.rangeLabel}`,
   }));
+
+  // Filter out hidden items
+  const visibleData = chartData.filter((d) => !hiddenItems.has(d.fullLabel));
+
+  // Toggle visibility of a legend item
+  const handleLegendClick = (dataKey: string) => {
+    setHiddenItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(dataKey)) {
+        newSet.delete(dataKey);
+      } else {
+        newSet.add(dataKey);
+      }
+      return newSet;
+    });
+  };
 
   const isDark = theme === "dark";
   const axisColor = isDark ? "#e5e5e5" : "#000000";
@@ -104,7 +122,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
         <ResponsiveContainer width="100%" height="100%">
           {chartType === "bar" ? (
             <BarChart
-              data={chartData}
+              data={visibleData}
               margin={{
                 top: 20,
                 right: 30,
@@ -170,15 +188,30 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                 ]}
               />
               <Bar dataKey="totalDownloads" maxBarSize={50}>
-                {chartData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={PALETTE[index % PALETTE.length]} />
-                ))}
+                {visibleData.map((entry, index) => {
+                  const originalIndex = chartData.findIndex((d) => d.fullLabel === entry.fullLabel);
+                  return (
+                    <Cell key={`cell-${index}`} fill={PALETTE[originalIndex % PALETTE.length]} />
+                  );
+                })}
               </Bar>
+              <Legend
+                content={() => (
+                  <ChartLegend
+                    data={chartData}
+                    hiddenItems={hiddenItems}
+                    palette={PALETTE}
+                    axisColor={axisColor}
+                    layout="horizontal"
+                    onToggle={handleLegendClick}
+                  />
+                )}
+              />
             </BarChart>
           ) : (
             <PieChart>
               <Pie
-                data={chartData}
+                data={visibleData}
                 cx="50%"
                 cy="50%"
                 innerRadius={0}
@@ -186,14 +219,17 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                 dataKey="totalDownloads"
                 nameKey="fullLabel"
               >
-                {chartData.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={PALETTE[index % PALETTE.length]}
-                    stroke={isDark ? "#171717" : "white"}
-                    strokeWidth={1}
-                  />
-                ))}
+                {visibleData.map((entry, index) => {
+                  const originalIndex = chartData.findIndex((d) => d.fullLabel === entry.fullLabel);
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={PALETTE[originalIndex % PALETTE.length]}
+                      stroke={isDark ? "#171717" : "white"}
+                      strokeWidth={1}
+                    />
+                  );
+                })}
               </Pie>
               <Tooltip
                 contentStyle={{
@@ -217,13 +253,16 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                 layout="vertical"
                 verticalAlign="middle"
                 align="right"
-                wrapperStyle={{
-                  fontSize: "11px",
-                  color: axisColor,
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                }}
-                iconType="square"
+                content={() => (
+                  <ChartLegend
+                    data={chartData}
+                    hiddenItems={hiddenItems}
+                    palette={PALETTE}
+                    axisColor={axisColor}
+                    layout="vertical"
+                    onToggle={handleLegendClick}
+                  />
+                )}
               />
             </PieChart>
           )}
