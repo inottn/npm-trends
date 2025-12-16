@@ -1,6 +1,6 @@
 import semver from "semver";
 
-const REGISTRY_URL = "https://registry.npmmirror.com";
+const REGISTRY_URL = "https://registry.npmjs.com";
 
 // User specified endpoint for bulk version stats
 const STATS_API_BASE = "https://api.npmjs.org/versions";
