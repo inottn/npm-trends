@@ -39,6 +39,10 @@ export interface Translation {
   noVersions: string;
   // Dropdown options
   optionAll: string;
+  // Share
+  shareLinkBtn: string;
+  shareLinkCopied: string;
+  shareLinkError: string;
 }
 
 export const dictionary: Record<Language, Translation> = {
@@ -76,6 +80,9 @@ export const dictionary: Record<Language, Translation> = {
     chartDownloads: "Downloads",
     noVersions: "No matching versions",
     optionAll: "All",
+    shareLinkBtn: "Share Link",
+    shareLinkCopied: "Link copied!",
+    shareLinkError: "Failed to copy",
   },
   zh: {
     appTitle: "NPM 趋势",
@@ -111,5 +118,8 @@ export const dictionary: Record<Language, Translation> = {
     chartDownloads: "下载量",
     noVersions: "无匹配版本",
     optionAll: "全部",
+    shareLinkBtn: "分享链接",
+    shareLinkCopied: "链接已复制！",
+    shareLinkError: "复制失败",
   },
 };

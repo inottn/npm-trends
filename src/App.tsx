@@ -1,6 +1,15 @@
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Loader2, ArrowRight, TrendingUp, AlertTriangle, Moon, Sun } from "lucide-react";
+import {
+  Loader2,
+  ArrowRight,
+  TrendingUp,
+  AlertTriangle,
+  Moon,
+  Sun,
+  Share2,
+  Check,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import semver from "semver";
 
@@ -24,6 +33,8 @@ export default function App() {
   const t = dictionary[lang];
 
   const [ranges, setRanges] = useState<VersionRange[]>(DEFAULT_RANGES);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [shouldAutoAnalyze, setShouldAutoAnalyze] = useState(false);
 
   const [state, setState] = useState<AnalysisState>({
     status: "idle",
@@ -43,6 +54,36 @@ export default function App() {
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  // Load ranges from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rangesParam = params.get("ranges");
+    if (rangesParam) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(rangesParam));
+        if (Array.isArray(decoded) && decoded.length > 0) {
+          setRanges(decoded);
+          setShouldAutoAnalyze(true);
+        }
+      } catch (e) {
+        console.error("Failed to parse ranges from URL", e);
+      }
+    }
+  }, []);
+
+  const handleShareLink = async () => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("ranges", encodeURIComponent(JSON.stringify(ranges)));
+      await navigator.clipboard.writeText(url.toString());
+      setCopyStatus("copied");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    } catch {
+      setCopyStatus("error");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    }
   };
 
   const cleanVer = (v: string) => {
@@ -275,6 +316,14 @@ export default function App() {
     }
   };
 
+  // Auto-analyze when loaded from URL
+  useEffect(() => {
+    if (shouldAutoAnalyze && ranges.length > 0) {
+      setShouldAutoAnalyze(false);
+      handleAnalyze();
+    }
+  }, [shouldAutoAnalyze, ranges]);
+
   const focusClass =
     "outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 rounded-sm";
 
@@ -402,9 +451,37 @@ export default function App() {
               <div className="space-y-12 animate-in fade-in duration-500">
                 {/* Chart Section */}
                 <div className="space-y-4">
-                  <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 pb-2 transition-colors duration-300">
-                    {t.vizTitle}
-                  </h2>
+                  <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-2 transition-colors duration-300">
+                    <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-400 transition-colors duration-300">
+                      {t.vizTitle}
+                    </h2>
+                    <button
+                      className={clsx(
+                        "px-3 py-1.5 bg-white dark:bg-neutral-950 text-neutral-400 dark:text-neutral-400 enabled:hover:text-black enabled:dark:hover:text-white text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                        focusClass,
+                      )}
+                      disabled={ranges.length === 0}
+                      title={t.shareLinkBtn}
+                      onClick={handleShareLink}
+                    >
+                      {copyStatus === "copied" ? (
+                        <>
+                          <Check size={14} />
+                          <span className="hidden sm:inline">{t.shareLinkCopied}</span>
+                        </>
+                      ) : copyStatus === "error" ? (
+                        <>
+                          <AlertTriangle size={14} />
+                          <span className="hidden sm:inline">{t.shareLinkError}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 size={14} />
+                          <span className="hidden sm:inline">{t.shareLinkBtn}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <div className="border border-neutral-200 dark:border-neutral-800 p-6 bg-white dark:bg-neutral-900 transition-colors duration-300">
                     <StatsChart data={state.results} translations={t} theme={theme} />
                   </div>
