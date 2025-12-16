@@ -304,44 +304,44 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
       {/* Action Bar */}
       <div className="p-4 bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 flex gap-2 transition-colors duration-300">
         <button
-          onClick={addRange}
-          disabled={disabled}
           className={clsx(
             "flex-1 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 enabled:hover:border-black enabled:dark:hover:border-white enabled:hover:text-black enabled:dark:hover:text-white text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
             focusClass,
           )}
+          disabled={disabled}
+          onClick={addRange}
         >
           <Plus size={14} />
           {t.addRow}
         </button>
 
         <button
-          onClick={mergeSelected}
-          disabled={disabled || !canMerge}
-          title={canMerge ? "" : t.mergeError}
           className={clsx(
-            "px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500 enabled:hover:border-accent enabled:dark:hover:border-blue-400 enabled:hover:text-accent enabled:dark:hover:text-blue-400 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed",
+            "px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 enabled:hover:border-accent enabled:dark:hover:border-blue-400 enabled:hover:text-accent enabled:dark:hover:text-blue-400 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
             focusClass,
           )}
+          disabled={disabled || !canMerge}
+          title={canMerge ? "" : t.mergeTitle}
+          onClick={mergeSelected}
         >
           <Merge size={14} />
           <span className="hidden sm:inline">{t.mergeBtn}</span>
         </button>
 
         <button
+          className={clsx(
+            "px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 enabled:hover:border-red-600 enabled:dark:hover:border-red-500 enabled:hover:text-red-600 enabled:dark:hover:text-red-500 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
+            focusClass,
+          )}
+          disabled={disabled || ranges.length === 0}
+          title={t.reset}
           onClick={() => {
             onChange([]);
             setSelectedIds([]);
           }}
-          disabled={disabled || ranges.length === 0}
-          className={clsx(
-            "px-4 py-2 bg-white dark:bg-neutral-950 border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500 enabled:hover:border-red-600 enabled:dark:hover:border-red-500 enabled:hover:text-red-600 enabled:dark:hover:text-red-500 text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed",
-            focusClass,
-          )}
-          title={t.reset}
         >
           <Trash2 size={14} />
-          <span className="hidden sm:inline ml-2">{t.reset}</span>
+          <span className="hidden sm:inline">{t.reset}</span>
         </button>
       </div>
     </div>

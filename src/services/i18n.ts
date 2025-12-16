@@ -30,7 +30,7 @@ export interface Translation {
   addRow: string;
   reset: string;
   mergeBtn: string; // New
-  mergeError: string; // New
+  mergeTitle: string; // New
   noRanges: string;
   // StatsChart
   chartTitle: string;
@@ -70,7 +70,7 @@ export const dictionary: Record<Language, Translation> = {
     addRow: "Add Row",
     reset: "Reset",
     mergeBtn: "Merge",
-    mergeError: "Select multiple ranges of the same package",
+    mergeTitle: "Select multiple ranges of the same package",
     noRanges: "No ranges defined.",
     chartTitle: "Downloads Distribution (7D)",
     chartDownloads: "Downloads",
@@ -105,7 +105,7 @@ export const dictionary: Record<Language, Translation> = {
     addRow: "添加行",
     reset: "重置",
     mergeBtn: "合并",
-    mergeError: "请选择同一包的多个范围",
+    mergeTitle: "请选择同一包的多个范围",
     noRanges: "尚未定义范围。",
     chartTitle: "下载量分布 (7天)",
     chartDownloads: "下载量",
