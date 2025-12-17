@@ -10,7 +10,7 @@ import {
   Share2,
   Check,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import semver from "semver";
 
 import type { VersionRange, AnalysisState, RangeResult } from "./types";
@@ -45,7 +45,7 @@ export default function App() {
   });
 
   // Handle Theme Change
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
