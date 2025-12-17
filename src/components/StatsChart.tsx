@@ -17,6 +17,7 @@ import {
 
 import type { Translation } from "../services/i18n";
 import type { RangeResult } from "../types";
+
 import ChartLegend from "./ChartLegend";
 
 interface StatsChartProps {
