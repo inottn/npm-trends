@@ -17,6 +17,7 @@ import type { VersionRange, AnalysisState, RangeResult } from "./types";
 
 import RangeBuilder from "./components/RangeBuilder";
 import StatsChart from "./components/StatsChart";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 import { npmKeys } from "./hooks/useNpm";
 import { dictionary, type Language } from "./services/i18n";
 import { getAllVersions, getVersionDownloads } from "./services/npm";
@@ -28,8 +29,8 @@ type Theme = "light" | "dark";
 
 export default function App() {
   const queryClient = useQueryClient();
-  const [lang, setLang] = useState<Language>("en");
-  const [theme, setTheme] = useState<Theme>("light");
+  const [lang, setLang] = useLocalStorage<Language>("npm-trends-lang", "en");
+  const [theme, setTheme] = useLocalStorage<Theme>("npm-trends-theme", "light");
   const t = dictionary[lang];
 
   const [ranges, setRanges] = useState<VersionRange[]>(DEFAULT_RANGES);
