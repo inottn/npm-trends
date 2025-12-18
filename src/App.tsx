@@ -194,8 +194,28 @@ export default function App() {
     });
 
     try {
-      // 1. Identify unique packages
-      const uniquePackages = Array.from(new Set(ranges.map((r) => r.packageName).filter(Boolean)));
+      // 1. Remove duplicate ranges
+      const dedupedRanges = ranges.filter((range, index, self) => {
+        if (!range.packageName) return false;
+
+        // Find first range with identical configuration
+        const firstIndex = self.findIndex(
+          (r) =>
+            r.packageName === range.packageName &&
+            r.start === range.start &&
+            r.end === range.end &&
+            r.isMin === range.isMin &&
+            r.isMax === range.isMax,
+        );
+
+        // Keep only the first occurrence
+        return firstIndex === index;
+      });
+
+      // 2. Identify unique packages
+      const uniquePackages = Array.from(
+        new Set(dedupedRanges.map((r) => r.packageName).filter(Boolean)),
+      );
 
       // 2. Fetch data for all packages in parallel
       const packageDataPromises = uniquePackages.map(async (pkg) => {
@@ -223,11 +243,11 @@ export default function App() {
         };
       });
 
-      // 3. Process each range against its package data
+      // 3. Process each deduplicated range against its package data
       let grandTotalDownloads = 0;
       const tempResults: RangeResult[] = [];
 
-      for (const range of ranges) {
+      for (const range of dedupedRanges) {
         if (!range.packageName || !dataMap[range.packageName]) continue;
 
         const { versions: allVersions, downloads: statsMap } = dataMap[range.packageName];
