@@ -142,7 +142,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                 }}
                 axisLine={{ stroke: axisColor }}
                 tickLine={false}
-                interval={0}
+                interval="preserveStart"
                 dy={10}
               />
               <YAxis
