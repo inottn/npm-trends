@@ -271,7 +271,15 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
       </div>
 
       {/* --- Main Ranges List --- */}
-      <div className="divide-y divide-neutral-200 dark:divide-neutral-800 transition-colors duration-300">
+      <div
+        className={clsx(
+          "divide-y divide-neutral-200 dark:divide-neutral-800 transition-colors duration-300 overflow-y-auto",
+          {
+            "max-h-[calc(100vh-34rem)]": ranges.length > 3,
+            "min-h-[32rem]": ranges.length > 3,
+          },
+        )}
+      >
         {ranges.length === 0 ? (
           <div className="p-8 text-center text-neutral-400 dark:text-neutral-600 text-sm transition-colors duration-300">
             {t.noRanges}
