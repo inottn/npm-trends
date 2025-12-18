@@ -21,6 +21,7 @@ import { useLocalStorage } from "./hooks/useLocalStorage";
 import { npmKeys } from "./hooks/useNpm";
 import { dictionary, type Language } from "./services/i18n";
 import { getAllVersions, getVersionDownloads } from "./services/npm";
+import { compressRanges, decompressRanges } from "./utils/compress";
 
 // Removed default values as requested
 const DEFAULT_RANGES: VersionRange[] = [];
@@ -60,10 +61,10 @@ export default function App() {
   // Load ranges from URL on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const rangesParam = params.get("ranges");
+    const rangesParam = params.get("r");
     if (rangesParam) {
       try {
-        const decoded = JSON.parse(decodeURIComponent(rangesParam));
+        const decoded = decompressRanges(rangesParam);
         if (Array.isArray(decoded) && decoded.length > 0) {
           setRanges(decoded);
           setShouldAutoAnalyze(true);
@@ -77,7 +78,7 @@ export default function App() {
   const handleShareLink = async () => {
     try {
       const url = new URL(window.location.href);
-      url.searchParams.set("ranges", encodeURIComponent(JSON.stringify(ranges)));
+      url.searchParams.set("r", compressRanges(ranges));
       await navigator.clipboard.writeText(url.toString());
       setCopyStatus("copied");
       setTimeout(() => setCopyStatus("idle"), 2000);
