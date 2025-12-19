@@ -1,4 +1,5 @@
 import React from "react";
+import { Legend } from "recharts";
 
 interface ChartLegendProps {
   data: Array<{ fullLabel: string }>;
@@ -19,11 +20,15 @@ const ChartLegend: React.FC<ChartLegendProps> = ({
 }) => {
   const isVertical = layout === "vertical";
 
-  return (
+  const legendContent = () => (
     <ul
       className={`
-        list-none p-0 m-0 text-[11px] font-semibold uppercase
-        ${isVertical ? "flex flex-col" : "flex flex-wrap justify-center gap-3 mt-5"}
+        flex list-none p-0 m-0 text-[11px] font-semibold uppercase overflow-y-auto
+        ${
+          isVertical
+            ? "flex-col max-h-[280px] pr-2"
+            : "flex-wrap justify-center max-h-[48px] gap-3 mt-5"
+        }
       `}
     >
       {data.map((entry, index) => {
@@ -50,6 +55,15 @@ const ChartLegend: React.FC<ChartLegendProps> = ({
         );
       })}
     </ul>
+  );
+
+  return (
+    <Legend
+      layout={isVertical ? "vertical" : "horizontal"}
+      verticalAlign={isVertical ? "middle" : undefined}
+      align={isVertical ? "right" : undefined}
+      content={legendContent}
+    />
   );
 };
 

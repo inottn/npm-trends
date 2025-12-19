@@ -11,7 +11,6 @@ import {
   Cell,
   PieChart,
   Pie,
-  Legend,
 } from "recharts";
 
 import type { Translation } from "../services/i18n";
@@ -82,6 +81,17 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
     PALETTE[0] = "#f5f5f5"; // Replace dark black with off-white for first item
     PALETTE[4] = "#9ca3af"; // Lighten gray
   }
+
+  const LegendNode = (
+    <ChartLegend
+      data={chartData}
+      hiddenItems={hiddenItems}
+      palette={PALETTE}
+      axisColor={axisColor}
+      layout={chartType === "pie" ? "vertical" : "horizontal"}
+      onToggle={handleLegendClick}
+    />
+  );
 
   // Improved focus class: ensures no ring on click (focus:ring-0), only on keyboard (focus-visible)
   const focusClass =
@@ -184,18 +194,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                   );
                 })}
               </Bar>
-              <Legend
-                content={() => (
-                  <ChartLegend
-                    data={chartData}
-                    hiddenItems={hiddenItems}
-                    palette={PALETTE}
-                    axisColor={axisColor}
-                    layout="horizontal"
-                    onToggle={handleLegendClick}
-                  />
-                )}
-              />
+              {LegendNode}
             </BarChart>
           ) : (
             <PieChart>
@@ -221,21 +220,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                 })}
               </Pie>
               <ChartTooltip isDark={isDark} formatter={tooltipFormatter} />
-              <Legend
-                layout="vertical"
-                verticalAlign="middle"
-                align="right"
-                content={() => (
-                  <ChartLegend
-                    data={chartData}
-                    hiddenItems={hiddenItems}
-                    palette={PALETTE}
-                    axisColor={axisColor}
-                    layout="vertical"
-                    onToggle={handleLegendClick}
-                  />
-                )}
-              />
+              {LegendNode}
             </PieChart>
           )}
         </ResponsiveContainer>
