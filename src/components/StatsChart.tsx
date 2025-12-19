@@ -47,6 +47,17 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
   // Filter out hidden items
   const visibleData = chartData.filter((d) => !hiddenItems.has(d.fullLabel));
 
+  // Calculate total downloads for visible items
+  const totalVisible = visibleData.reduce((sum, d) => sum + d.totalDownloads, 0);
+
+  const tooltipFormatter = (value: number) => {
+    const percentage = totalVisible > 0 ? ((value / totalVisible) * 100).toFixed(1) : "0";
+    return [
+      `${new Intl.NumberFormat().format(value)} (${percentage}%)`,
+      t.chartDownloads,
+    ] satisfies [string, string];
+  };
+
   // Toggle visibility of a legend item
   const handleLegendClick = (dataKey: string) => {
     setHiddenItems((prev) => {
@@ -161,10 +172,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
               />
               <ChartTooltip
                 isDark={isDark}
-                formatter={(value: number) => [
-                  new Intl.NumberFormat().format(value),
-                  t.chartDownloads,
-                ]}
+                formatter={tooltipFormatter}
                 showCursor={true}
                 showLabel={true}
               />
@@ -212,13 +220,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                   );
                 })}
               </Pie>
-              <ChartTooltip
-                isDark={isDark}
-                formatter={(value: number) => [
-                  new Intl.NumberFormat().format(value),
-                  t.chartDownloads,
-                ]}
-              />
+              <ChartTooltip isDark={isDark} formatter={tooltipFormatter} />
               <Legend
                 layout="vertical"
                 verticalAlign="middle"
