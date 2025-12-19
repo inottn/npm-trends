@@ -7,7 +7,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
   Cell,
   PieChart,
@@ -19,6 +18,7 @@ import type { Translation } from "../services/i18n";
 import type { RangeResult } from "../types";
 
 import ChartLegend from "./ChartLegend";
+import ChartTooltip from "./ChartTooltip";
 
 interface StatsChartProps {
   data: RangeResult[];
@@ -64,9 +64,6 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
   const axisColor = isDark ? "#e5e5e5" : "#000000";
   const gridColor = isDark ? "#404040" : "#e5e7eb";
   const tickColor = isDark ? "#a3a3a3" : "#6b7280";
-  const tooltipBg = isDark ? "#000" : "#fff";
-  const tooltipBorder = isDark ? "#404040" : "#000";
-  const tooltipText = isDark ? "#fff" : "#000";
 
   // Adjust palette for dark mode visibility (replace black with white or light gray)
   const PALETTE = [...COLORS];
@@ -162,31 +159,14 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                 }
                 dx={-10}
               />
-              <Tooltip
-                cursor={{ fill: isDark ? "#262626" : "#f3f4f6" }}
-                contentStyle={{
-                  borderRadius: "0px",
-                  border: `1px solid ${tooltipBorder}`,
-                  boxShadow: "none",
-                  padding: "8px 12px",
-                  fontFamily: "Inter, sans-serif",
-                  backgroundColor: tooltipBg,
-                }}
-                itemStyle={{
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: tooltipText,
-                }}
-                labelStyle={{
-                  fontSize: "10px",
-                  color: tickColor,
-                  textTransform: "uppercase",
-                  marginBottom: "4px",
-                }}
+              <ChartTooltip
+                isDark={isDark}
                 formatter={(value: number) => [
                   new Intl.NumberFormat().format(value),
                   t.chartDownloads,
                 ]}
+                showCursor={true}
+                showLabel={true}
               />
               <Bar dataKey="totalDownloads" maxBarSize={50}>
                 {visibleData.map((entry, index) => {
@@ -232,19 +212,8 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
                   );
                 })}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  borderRadius: "0px",
-                  border: `1px solid ${tooltipBorder}`,
-                  boxShadow: "none",
-                  padding: "8px 12px",
-                  backgroundColor: tooltipBg,
-                }}
-                itemStyle={{
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: tooltipText,
-                }}
+              <ChartTooltip
+                isDark={isDark}
                 formatter={(value: number) => [
                   new Intl.NumberFormat().format(value),
                   t.chartDownloads,
