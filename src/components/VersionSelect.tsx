@@ -73,7 +73,12 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -162,16 +167,16 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
           return (
             <div
               key={ver}
-              onClick={() => {
-                onChange(ver);
-                setIsOpen(false);
-              }}
               className={clsx(
                 "px-3 py-2 flex items-center justify-between text-xs cursor-pointer transition-colors duration-300 border-b border-neutral-100 dark:border-neutral-800 last:border-0",
                 isSelected
                   ? "bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white font-bold"
                   : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white",
               )}
+              onClick={() => {
+                onChange(ver);
+                setIsOpen(false);
+              }}
             >
               <span className="truncate font-mono">{ver}</span>
               {isSelected && (
@@ -196,6 +201,10 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
     >
       <div className="relative group">
         <input
+          autoComplete="off"
+          className="w-full h-8 px-2 text-sm bg-white dark:bg-transparent border-b border-neutral-300 dark:border-neutral-700 focus:border-black dark:focus:border-white focus:ring-0 outline-none transition-colors duration-300 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 font-mono text-neutral-900 dark:text-neutral-200 rounded-none"
+          disabled={disabled}
+          placeholder={placeholder}
           ref={inputRef}
           type="text"
           value={value}
@@ -203,11 +212,12 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
             onChange(e.target.value);
             openDropdown();
           }}
-          onFocus={openDropdown}
-          placeholder={placeholder}
-          disabled={disabled}
-          className="w-full h-8 px-2 text-sm bg-white dark:bg-transparent border-b border-neutral-300 dark:border-neutral-700 focus:border-black dark:focus:border-white focus:ring-0 outline-none transition-colors duration-300 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 font-mono text-neutral-900 dark:text-neutral-200 rounded-none"
-          autoComplete="off"
+          onClick={openDropdown}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              openDropdown();
+            }
+          }}
         />
         <div className="absolute right-1 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-600 pointer-events-none group-focus-within:text-black dark:group-focus-within:text-white transition-colors duration-300">
           <ChevronDown size={12} strokeWidth={2} />
