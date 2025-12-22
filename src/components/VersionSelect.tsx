@@ -1,7 +1,11 @@
 import clsx from "clsx";
 import { ChevronDown, Check } from "lucide-react";
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
+
+import { useClickOutside } from "../hooks/useClickOutside";
+import { useDropdownPosition } from "../hooks/useDropdownPosition";
+import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 
 interface VersionSelectProps {
   className?: string;
@@ -25,119 +29,24 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
   onChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
-  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Calculate and set dropdown position
-  const calculatePosition = useCallback(() => {
-    if (inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      return {
-        top: rect.bottom,
-        left: rect.left,
-        width: rect.width,
-      };
-    }
-    return null;
-  }, []);
-
-  // Update dropdown position
-  const updateDropdownPosition = useCallback(() => {
-    const newPosition = calculatePosition();
-    if (newPosition) {
-      // Update state for initial render
-      setDropdownPosition(newPosition);
-
-      // Directly update dropdown DOM for smoother updates during scroll
-      if (dropdownRef.current) {
-        dropdownRef.current.style.top = `${newPosition.top}px`;
-        dropdownRef.current.style.left = `${newPosition.left}px`;
-        dropdownRef.current.style.width = `${newPosition.width}px`;
-      }
-    }
-  }, [calculatePosition]);
+  // Use custom hooks
+  const { dropdownPosition, updatePosition } = useDropdownPosition(inputRef, dropdownRef, isOpen);
 
   // Open dropdown with correct initial position
   const openDropdown = useCallback(() => {
     if (!isOpen) {
-      const position = calculatePosition();
-      if (position) {
-        setDropdownPosition(position);
-      }
+      updatePosition();
       setIsOpen(true);
     }
-  }, [isOpen, calculatePosition]);
+  }, [isOpen]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
   }, []);
-
-  // Update position when dropdown opens or on scroll/resize
-  useEffect(() => {
-    if (isOpen) {
-      // Initial position update
-      updateDropdownPosition();
-
-      const handleScrollOrResize = () => {
-        // Cancel any pending animation frame
-        if (rafRef.current !== null) {
-          cancelAnimationFrame(rafRef.current);
-        }
-
-        // Use requestAnimationFrame for smooth updates
-        rafRef.current = requestAnimationFrame(() => {
-          updateDropdownPosition();
-          rafRef.current = null;
-        });
-      };
-
-      // Listen to scroll events on all parent elements and window
-      let currentElement = inputRef.current?.parentElement;
-      const scrollElements: HTMLElement[] = [];
-
-      while (currentElement) {
-        const overflowY = window.getComputedStyle(currentElement).overflowY;
-        if (overflowY === "auto" || overflowY === "scroll") {
-          scrollElements.push(currentElement);
-          currentElement.addEventListener("scroll", handleScrollOrResize);
-        }
-        currentElement = currentElement.parentElement;
-      }
-
-      window.addEventListener("scroll", handleScrollOrResize, true);
-      window.addEventListener("resize", handleScrollOrResize);
-
-      return () => {
-        scrollElements.forEach((element) => {
-          element.removeEventListener("scroll", handleScrollOrResize);
-        });
-        window.removeEventListener("scroll", handleScrollOrResize, true);
-        window.removeEventListener("resize", handleScrollOrResize);
-
-        // Cancel any pending animation frame on cleanup
-        if (rafRef.current !== null) {
-          cancelAnimationFrame(rafRef.current);
-          rafRef.current = null;
-        }
-      };
-    }
-  }, [isOpen, updateDropdownPosition]);
 
   // Filter options based on input value
   const filteredOptions = useMemo(() => {
@@ -145,67 +54,18 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
     return options.filter((opt) => opt.toLowerCase().includes(lowerValue));
   }, [options, value]);
 
-  // Reset highlighted index when filtered options change
-  useEffect(() => {
-    if (isOpen) {
-      // Find the index of the current value in filtered options
-      const currentIndex = filteredOptions.findIndex((opt) => opt === value);
-      setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
-    }
-  }, [filteredOptions, isOpen, value]);
+  const { highlightedIndex, setHighlightedIndex, optionRefs, handleKeyDown } =
+    useKeyboardNavigation({
+      isOpen,
+      filteredOptions,
+      value,
+      inputRef,
+      onOpen: openDropdown,
+      onSelect: onChange,
+      onClose: closeDropdown,
+    });
 
-  // Scroll highlighted option into view
-  useEffect(() => {
-    if (highlightedIndex >= 0 && isOpen && optionRefs.current[highlightedIndex]) {
-      optionRefs.current[highlightedIndex]?.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
-      });
-    }
-  }, [highlightedIndex, isOpen]);
-
-  // Handle keyboard navigation
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (!isOpen) {
-        if (e.key === "Enter" || e.key === "ArrowDown" || e.key === "ArrowUp") {
-          openDropdown();
-          e.preventDefault();
-        }
-        return;
-      }
-
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault();
-          setHighlightedIndex((prev) => {
-            const next = prev + 1;
-            return next >= filteredOptions.length ? 0 : next;
-          });
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          setHighlightedIndex((prev) => {
-            const next = prev - 1;
-            return next < 0 ? filteredOptions.length - 1 : next;
-          });
-          break;
-        case "Enter":
-          e.preventDefault();
-          if (highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
-            onChange(filteredOptions[highlightedIndex]);
-            setIsOpen(false);
-          }
-          break;
-        case "Escape":
-          e.preventDefault();
-          setIsOpen(false);
-          inputRef.current?.blur();
-          break;
-      }
-    },
-    [isOpen, openDropdown, highlightedIndex, filteredOptions, onChange],
-  );
+  useClickOutside([dropdownRef, inputRef], closeDropdown);
 
   // Render dropdown menu
   const dropdownMenu = isOpen && !disabled && (
@@ -245,7 +105,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
               )}
               onClick={() => {
                 onChange(ver);
-                setIsOpen(false);
+                closeDropdown();
               }}
               onMouseEnter={() => setHighlightedIndex(index)}
             >
@@ -266,7 +126,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
       ref={wrapperRef}
       onBlur={(e) => {
         if (!wrapperRef.current?.contains(e.relatedTarget as Node)) {
-          setIsOpen(false);
+          closeDropdown();
         }
       }}
     >
