@@ -26,10 +26,12 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Calculate and set dropdown position
   const calculatePosition = useCallback(() => {
@@ -143,6 +145,68 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
     return options.filter((opt) => opt.toLowerCase().includes(lowerValue));
   }, [options, value]);
 
+  // Reset highlighted index when filtered options change
+  useEffect(() => {
+    if (isOpen) {
+      // Find the index of the current value in filtered options
+      const currentIndex = filteredOptions.findIndex((opt) => opt === value);
+      setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
+    }
+  }, [filteredOptions, isOpen, value]);
+
+  // Scroll highlighted option into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && isOpen && optionRefs.current[highlightedIndex]) {
+      optionRefs.current[highlightedIndex]?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  }, [highlightedIndex, isOpen]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!isOpen) {
+        if (e.key === "Enter" || e.key === "ArrowDown" || e.key === "ArrowUp") {
+          openDropdown();
+          e.preventDefault();
+        }
+        return;
+      }
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setHighlightedIndex((prev) => {
+            const next = prev + 1;
+            return next >= filteredOptions.length ? 0 : next;
+          });
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setHighlightedIndex((prev) => {
+            const next = prev - 1;
+            return next < 0 ? filteredOptions.length - 1 : next;
+          });
+          break;
+        case "Enter":
+          e.preventDefault();
+          if (highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
+            onChange(filteredOptions[highlightedIndex]);
+            setIsOpen(false);
+          }
+          break;
+        case "Escape":
+          e.preventDefault();
+          setIsOpen(false);
+          inputRef.current?.blur();
+          break;
+      }
+    },
+    [isOpen, openDropdown, highlightedIndex, filteredOptions, onChange],
+  );
+
   // Render dropdown menu
   const dropdownMenu = isOpen && !disabled && (
     <div
@@ -162,21 +226,28 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
           {emptyMessage}
         </div>
       ) : (
-        filteredOptions.map((ver) => {
+        filteredOptions.map((ver, index) => {
           const isSelected = value === ver;
+          const isHighlighted = index === highlightedIndex;
           return (
             <div
               key={ver}
+              ref={(el) => {
+                optionRefs.current[index] = el;
+              }}
               className={clsx(
                 "px-3 py-2 flex items-center justify-between text-xs cursor-pointer transition-colors duration-300 border-b border-neutral-100 dark:border-neutral-800 last:border-0",
                 isSelected
                   ? "bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white font-bold"
-                  : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white",
+                  : isHighlighted
+                    ? "bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white"
+                    : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white",
               )}
               onClick={() => {
                 onChange(ver);
                 setIsOpen(false);
               }}
+              onMouseEnter={() => setHighlightedIndex(index)}
             >
               <span className="truncate font-mono">{ver}</span>
               {isSelected && (
@@ -213,11 +284,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
             openDropdown();
           }}
           onClick={openDropdown}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              openDropdown();
-            }
-          }}
+          onKeyDown={handleKeyDown}
         />
         <div className="absolute right-1 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-600 pointer-events-none group-focus-within:text-black dark:group-focus-within:text-white transition-colors duration-300">
           <ChevronDown size={12} strokeWidth={2} />
