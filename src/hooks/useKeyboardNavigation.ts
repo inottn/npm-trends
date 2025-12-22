@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseKeyboardNavigationProps {
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  isOpen: boolean;
   filteredOptions: string[];
+  isOpen: boolean;
   value: string;
   onClose: () => void;
   onOpen: () => void;
@@ -11,9 +10,8 @@ interface UseKeyboardNavigationProps {
 }
 
 export const useKeyboardNavigation = ({
-  inputRef,
-  isOpen,
   filteredOptions,
+  isOpen,
   value,
   onClose,
   onOpen,

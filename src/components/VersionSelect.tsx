@@ -56,13 +56,12 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
 
   const { highlightedIndex, setHighlightedIndex, optionRefs, handleKeyDown } =
     useKeyboardNavigation({
-      isOpen,
       filteredOptions,
+      isOpen,
       value,
-      inputRef,
+      onClose: closeDropdown,
       onOpen: openDropdown,
       onSelect: onChange,
-      onClose: closeDropdown,
     });
 
   useClickOutside([dropdownRef, inputRef], closeDropdown);
