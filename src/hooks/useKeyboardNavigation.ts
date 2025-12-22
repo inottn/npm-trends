@@ -77,7 +77,6 @@ export const useKeyboardNavigation = ({
         case "Escape":
           e.preventDefault();
           onClose();
-          inputRef.current?.blur();
           break;
       }
     },
