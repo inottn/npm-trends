@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import clsx from "clsx";
 import { Plus, Trash2, Loader2, ChevronDown, Merge } from "lucide-react";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import semver from "semver";
 
 import type { Translation } from "../services/i18n";
@@ -46,6 +46,8 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [showMinorsMenu, setShowMinorsMenu] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -83,6 +85,7 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
         isMin: false,
       },
     ]);
+    setShouldScrollToBottom(true);
   };
 
   const removeRange = (id: string) => {
@@ -105,6 +108,17 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
   const toggleSelection = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
+
+  // Scroll to bottom when a new range is added
+  useEffect(() => {
+    if (shouldScrollToBottom && listContainerRef.current) {
+      listContainerRef.current.scrollTo({
+        top: listContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      setShouldScrollToBottom(false);
+    }
+  }, [shouldScrollToBottom, ranges]);
 
   // Merge Logic
   const canMerge = useMemo(() => {
@@ -272,6 +286,7 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
 
       {/* --- Main Ranges List --- */}
       <div
+        ref={listContainerRef}
         className={clsx(
           "divide-y divide-neutral-200 dark:divide-neutral-800 transition-colors duration-300 overflow-y-auto",
           {
