@@ -153,6 +153,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
               <XAxis
                 dataKey="fullLabel"
                 tick={{
+                  className: "selection:fill-current",
                   fill: axisColor,
                   fontSize: 10,
                   fontWeight: 600,
@@ -165,6 +166,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data, translations: t, theme })
               />
               <YAxis
                 tick={{
+                  className: "selection:fill-current",
                   fill: tickColor,
                   fontSize: 10,
                   fontWeight: 500,
