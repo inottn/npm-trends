@@ -99,6 +99,7 @@ export default function App() {
   const handleQuickAdd = async (
     packageName: string,
     type: "majors" | "minors",
+    scope: "latest" | "all" = "latest",
     limit?: number | "all",
   ) => {
     const trimmedName = packageName.trim();
@@ -116,17 +117,92 @@ export default function App() {
       return;
     }
 
-    if (versions.length === 0) return; // Could not fetch
+    if (versions.length === 0) return;
+
+    // Helper: Extract unique majors from versions
+    const extractMajors = (versionList: string[]): number[] => {
+      const majors = new Set<number>();
+      versionList.forEach((v) => {
+        const parsed = semver.coerce(v);
+        if (parsed) majors.add(parsed.major);
+      });
+      return Array.from(majors).sort((a, b) => a - b);
+    };
+
+    // Helper: Extract unique minors for a specific major
+    const extractMinorsForMajor = (versionList: string[], major: number): number[] => {
+      const minors = new Set<number>();
+      versionList.forEach((v) => {
+        const parsed = semver.coerce(v);
+        if (parsed && parsed.major === major) {
+          minors.add(parsed.minor);
+        }
+      });
+      return Array.from(minors).sort((a, b) => a - b);
+    };
+
+    // Helper: Apply limit to array
+    const applyLimit = <T,>(arr: T[], limitValue?: number | "all"): T[] => {
+      if (limitValue === "all") return arr;
+      const count = typeof limitValue === "number" ? limitValue : 5;
+      return arr.slice(-count);
+    };
+
+    // Helper: Calculate end version for a minor entry
+    const calculateEndVersion = (
+      major: number,
+      minor: number,
+      nextEntry: { major: number; minor: number } | undefined,
+      sortedMajors: number[],
+    ): string => {
+      if (nextEntry) {
+        return `${nextEntry.major}.${nextEntry.minor}.0`;
+      }
+
+      // Find next version boundary
+      const majorIdx = sortedMajors.indexOf(major);
+      const minorsForThisMajor = extractMinorsForMajor(versions, major);
+      const minorIdx = minorsForThisMajor.indexOf(minor);
+
+      // Check if there's a next minor in the same major
+      if (minorIdx < minorsForThisMajor.length - 1) {
+        return `${major}.${minorsForThisMajor[minorIdx + 1]}.0`;
+      }
+
+      // Next major
+      if (majorIdx < sortedMajors.length - 1) {
+        return `${sortedMajors[majorIdx + 1]}.0.0`;
+      }
+
+      return "";
+    };
+
+    // Helper: Create ranges from minor entries
+    const createMinorRanges = (
+      entries: Array<{ major: number; minor: number }>,
+      sortedMajors: number[],
+    ): VersionRange[] => {
+      return entries.map((entry, idx) => {
+        const { major, minor } = entry;
+        const isLast = idx === entries.length - 1;
+        const nextEntry = entries[idx + 1];
+        const end = calculateEndVersion(major, minor, nextEntry, sortedMajors);
+
+        return {
+          id: Math.random().toString(36).substring(7),
+          packageName: trimmedName,
+          start: `${major}.${minor}.0`,
+          end,
+          isMax: isLast && end === "",
+          isMin: false,
+        };
+      });
+    };
 
     const newRanges: VersionRange[] = [];
 
     if (type === "majors") {
-      const majors = new Set<number>();
-      versions.forEach((v: string) => {
-        const parsed = semver.coerce(v);
-        if (parsed) majors.add(parsed.major);
-      });
-      const sortedMajors = Array.from(majors).sort((a, b) => a - b);
+      const sortedMajors = extractMajors(versions);
 
       sortedMajors.forEach((major, idx) => {
         const isLast = idx === sortedMajors.length - 1;
@@ -140,43 +216,31 @@ export default function App() {
         });
       });
     } else if (type === "minors") {
-      // Find latest major
-      const latest = versions[0]; // versions are sorted descending
-      const parsedLatest = semver.coerce(latest);
+      const sortedMajors = extractMajors(versions);
 
-      if (parsedLatest) {
-        const targetMajor = parsedLatest.major;
-        const minors = new Set<number>();
+      if (scope === "latest") {
+        // Only process the latest major
+        const latestMajor = sortedMajors[sortedMajors.length - 1];
+        const sortedMinors = extractMinorsForMajor(versions, latestMajor);
+        if (sortedMinors.length === 0) return;
 
-        versions.forEach((v: string) => {
-          const parsed = semver.coerce(v);
-          if (parsed && parsed.major === targetMajor) {
-            minors.add(parsed.minor);
-          }
-        });
+        const targetMinors = applyLimit(sortedMinors, limit);
+        const entries = targetMinors.map((minor) => ({ major: latestMajor, minor }));
+        newRanges.push(...createMinorRanges(entries, sortedMajors));
+      } else {
+        // scope === "all": Collect all minors from all majors, then apply limit globally
+        const allMinorEntries: Array<{ major: number; minor: number }> = [];
 
-        const sortedMinors = Array.from(minors).sort((a, b) => a - b);
-
-        // Handle limit
-        let recentMinors = sortedMinors;
-        if (limit !== "all") {
-          const count = typeof limit === "number" ? limit : 5;
-          recentMinors = sortedMinors.slice(-count);
-        }
-
-        recentMinors.forEach((minor, idx) => {
-          const isLast = idx === recentMinors.length - 1;
-          const nextMinor = recentMinors[idx + 1];
-
-          newRanges.push({
-            id: Math.random().toString(36).substring(7),
-            packageName: trimmedName,
-            start: `${targetMajor}.${minor}.0`,
-            end: nextMinor ? `${targetMajor}.${nextMinor}.0` : "",
-            isMax: isLast,
-            isMin: false,
+        sortedMajors.forEach((major) => {
+          const sortedMinors = extractMinorsForMajor(versions, major);
+          sortedMinors.forEach((minor) => {
+            allMinorEntries.push({ major, minor });
           });
         });
+
+        // Apply limit to all minors globally (taking the latest from the end)
+        const targetEntries = applyLimit(allMinorEntries, limit);
+        newRanges.push(...createMinorRanges(targetEntries, sortedMajors));
       }
     }
 
@@ -410,11 +474,11 @@ export default function App() {
                 {t.configTitle}
               </div>
               <RangeBuilder
+                disabled={state.status === "loading"}
                 ranges={ranges}
+                translations={t}
                 onChange={setRanges}
                 onQuickAdd={handleQuickAdd}
-                disabled={state.status === "loading"}
-                translations={t}
               />
             </div>
 

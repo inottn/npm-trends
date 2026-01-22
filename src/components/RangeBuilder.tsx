@@ -21,6 +21,7 @@ import semver from "semver";
 import type { Translation } from "../services/i18n";
 import type { VersionRange } from "../types";
 
+import MinorsMenu from "./MinorsMenu";
 import RangeRow from "./RangeRow";
 
 interface RangeBuilderProps {
@@ -29,6 +30,7 @@ interface RangeBuilderProps {
   onQuickAdd: (
     packageName: string,
     type: "majors" | "minors",
+    scope?: "latest" | "all",
     limit?: number | "all",
   ) => Promise<void>;
   disabled?: boolean;
@@ -36,15 +38,16 @@ interface RangeBuilderProps {
 }
 
 const RangeBuilder: React.FC<RangeBuilderProps> = ({
+  disabled,
   ranges,
+  translations: t,
   onChange,
   onQuickAdd,
-  disabled,
-  translations: t,
 }) => {
   const [quickPackage, setQuickPackage] = useState("");
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [showMinorsMenu, setShowMinorsMenu] = useState(false);
+  const [minorsScope, setMinorsScope] = useState<"latest" | "all">("latest");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -97,10 +100,15 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
     onChange(ranges.map((r) => (r.id === id ? { ...r, ...updates } : r)));
   };
 
-  const handleQuickGenerator = async (type: "majors" | "minors", limit?: number | "all") => {
+  const handleQuickGenerator = async (
+    type: "majors" | "minors",
+    scope?: "latest" | "all",
+    limit?: number | "all",
+  ) => {
     if (!quickPackage.trim()) return;
-    setIsGenerating(type);
-    await onQuickAdd(quickPackage, type, limit);
+    const key = scope ? `${type}-${scope}` : type;
+    setIsGenerating(key);
+    await onQuickAdd(quickPackage, type, scope, limit);
     setIsGenerating(null);
     setShowMinorsMenu(false);
   };
@@ -223,30 +231,37 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => handleQuickGenerator("majors")}
-            disabled={disabled || !quickPackage || !!isGenerating}
             className={clsx(
               "h-8 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 enabled:hover:border-black enabled:dark:hover:border-white text-neutral-700 dark:text-neutral-300 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
               focusClass,
             )}
+            disabled={disabled || !quickPackage || !!isGenerating}
+            onClick={() => handleQuickGenerator("majors")}
           >
             {isGenerating === "majors" ? <Loader2 size={12} className="animate-spin" /> : t.byMajor}
           </button>
 
           <div
             className="relative"
-            onMouseEnter={() => !disabled && quickPackage && setShowMinorsMenu(true)}
-            onMouseLeave={() => setShowMinorsMenu(false)}
+            onMouseEnter={() => {
+              if (!disabled && quickPackage) {
+                setShowMinorsMenu(true);
+                setMinorsScope((prev) => prev || "latest");
+              }
+            }}
+            onMouseLeave={() => {
+              setShowMinorsMenu(false);
+            }}
           >
             <button
-              onClick={() => handleQuickGenerator("minors", 5)}
+              onClick={() => handleQuickGenerator("minors", "latest", 5)}
               disabled={disabled || !quickPackage || !!isGenerating}
               className={clsx(
                 "w-full h-8 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 enabled:hover:border-black enabled:dark:hover:border-white text-neutral-700 dark:text-neutral-300 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
                 focusClass,
               )}
             >
-              {isGenerating === "minors" ? (
+              {isGenerating?.startsWith("minors") ? (
                 <Loader2 size={12} className="animate-spin" />
               ) : (
                 <>
@@ -257,29 +272,13 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
             </button>
 
             {/* Dropdown Menu */}
-            {showMinorsMenu && !disabled && !isGenerating && (
-              <div className="absolute top-full left-0 right-0 z-20 pt-1">
-                <div className="bg-white dark:bg-neutral-900 border border-black dark:border-white shadow-lg animate-in fade-in zoom-in-95 duration-100">
-                  <div className="py-1 grid grid-cols-1 divide-y divide-neutral-100 dark:divide-neutral-800">
-                    {[5, 10, 15].map((num) => (
-                      <button
-                        key={num}
-                        onClick={() => handleQuickGenerator("minors", num)}
-                        className="px-3 py-2 text-left text-xs font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors outline-none focus-visible:bg-neutral-100 dark:focus-visible:bg-neutral-800"
-                      >
-                        {num}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => handleQuickGenerator("minors", "all")}
-                      className="px-3 py-2 text-left text-xs font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors outline-none focus-visible:bg-neutral-100 dark:focus-visible:bg-neutral-800"
-                    >
-                      {t.optionAll}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            <MinorsMenu
+              activeScope={minorsScope}
+              open={showMinorsMenu && !disabled && !isGenerating}
+              translations={t}
+              onSelect={(scope, limit) => handleQuickGenerator("minors", scope, limit)}
+              onScopeChange={setMinorsScope}
+            />
           </div>
         </div>
       </div>

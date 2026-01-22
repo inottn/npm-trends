@@ -20,6 +20,8 @@ export interface Translation {
   pkgPlaceholder: string;
   byMajor: string;
   byMinor: string;
+  minorsLatestLabel: string; // New
+  minorsAllLabel: string; // New
   pkgInputPlaceholder: string;
   startPlaceholder: string;
   endPlaceholder: string;
@@ -64,6 +66,8 @@ export const dictionary: Record<Language, Translation> = {
     pkgPlaceholder: "Package name...",
     byMajor: "By Major",
     byMinor: "By Minor",
+    minorsLatestLabel: "Latest major",
+    minorsAllLabel: "All majors",
     pkgInputPlaceholder: "PKG",
     startPlaceholder: "Start",
     endPlaceholder: "End",
@@ -102,6 +106,8 @@ export const dictionary: Record<Language, Translation> = {
     pkgPlaceholder: "输入包名...",
     byMajor: "按主版本",
     byMinor: "按次版本",
+    minorsLatestLabel: "最新主版本",
+    minorsAllLabel: "所有主版本",
     pkgInputPlaceholder: "包名",
     startPlaceholder: "起始",
     endPlaceholder: "结束",
