@@ -8,6 +8,7 @@ import type { Translation } from "../services/i18n";
 import type { VersionRange } from "../types";
 
 import { usePackageVersions } from "../hooks/useNpm";
+import InputClearButton from "./InputClearButton";
 import VersionSelect from "./VersionSelect";
 
 interface RangeRowProps {
@@ -35,6 +36,11 @@ const RangeRow: React.FC<RangeRowProps> = ({
 
   const handleBlur = () => {
     setQueryPkg(range.packageName);
+  };
+
+  const clearPackageName = () => {
+    onUpdate(range.id, { packageName: "" });
+    setQueryPkg("");
   };
 
   useEffect(() => {
@@ -116,8 +122,15 @@ const RangeRow: React.FC<RangeRowProps> = ({
                 onBlur={handleBlur}
                 placeholder={t.pkgInputPlaceholder}
                 disabled={disabled}
-                className="w-full bg-transparent border-b border-transparent focus:border-black dark:focus:border-white p-0 pb-0.5 text-sm font-bold text-black dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-700 focus:ring-0 outline-none transition-colors duration-300"
+                className="w-full bg-transparent border-b border-transparent focus:border-black dark:focus:border-white p-0 pb-0.5 pr-8 text-sm font-bold text-black dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-700 focus:ring-0 outline-none transition-colors duration-300"
               />
+              {range.packageName && !disabled && (
+                <InputClearButton
+                  className={isLoading ? "right-5" : "right-0"}
+                  label={t.clearInput}
+                  onClick={clearPackageName}
+                />
+              )}
               {isLoading && (
                 <div className="absolute right-0 top-1/2 -translate-y-1/2">
                   <Loader2 size={12} className="animate-spin text-neutral-500" />
@@ -163,6 +176,7 @@ const RangeRow: React.FC<RangeRowProps> = ({
                   options={versions}
                   placeholder={t.startPlaceholder}
                   emptyMessage={t.noVersions}
+                  clearLabel={t.clearInput}
                   disabled={disabled || versions.length === 0}
                 />
                 <div className="mt-1 text-right">
@@ -223,6 +237,7 @@ const RangeRow: React.FC<RangeRowProps> = ({
                   options={versions}
                   placeholder={t.endPlaceholder}
                   emptyMessage={t.noVersions}
+                  clearLabel={t.clearInput}
                   disabled={disabled || versions.length === 0}
                 />
                 <div className="mt-1 text-right">

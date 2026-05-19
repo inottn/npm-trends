@@ -14,8 +14,11 @@ import clsx from "clsx";
 import { ChevronDown, Check } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
+import InputClearButton from "./InputClearButton";
+
 interface VersionSelectProps {
   className?: string;
+  clearLabel?: string;
   disabled?: boolean;
   emptyMessage?: string;
   options: string[];
@@ -28,6 +31,7 @@ const MAX_DROPDOWN_HEIGHT = 220;
 
 const VersionSelect: React.FC<VersionSelectProps> = ({
   className = "",
+  clearLabel = "Clear input",
   disabled,
   emptyMessage = "No matching versions",
   options,
@@ -37,6 +41,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const filteredOptions = useMemo(() => {
@@ -102,6 +107,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
 
   const setReference = useCallback(
     (node: HTMLInputElement | null) => {
+      inputRef.current = node;
       floatingRefs.setReference(node);
     },
     [floatingRefs],
@@ -124,6 +130,12 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
     setIsOpen(false);
     setActiveIndex(null);
     itemRefs.current = [];
+  };
+
+  const clearValue = () => {
+    onChange("");
+    setActiveIndex(null);
+    inputRef.current?.focus();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -230,7 +242,7 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
       <div className="relative group">
         <input
           autoComplete="off"
-          className="w-full h-8 px-2 text-sm bg-white dark:bg-transparent border-b border-neutral-300 dark:border-neutral-700 focus:border-black dark:focus:border-white focus:ring-0 outline-none transition-colors duration-300 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 font-mono text-neutral-900 dark:text-neutral-200 rounded-none"
+          className="w-full h-8 pl-2 pr-10 text-sm bg-white dark:bg-transparent border-b border-neutral-300 dark:border-neutral-700 focus:border-black dark:focus:border-white focus:ring-0 outline-none transition-colors duration-300 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 font-mono text-neutral-900 dark:text-neutral-200 rounded-none"
           disabled={disabled}
           placeholder={placeholder}
           type="text"
@@ -246,6 +258,9 @@ const VersionSelect: React.FC<VersionSelectProps> = ({
             onKeyDown: handleKeyDown,
           })}
         />
+        {value && !disabled && (
+          <InputClearButton className="right-5" label={clearLabel} onClick={clearValue} />
+        )}
         <div className="absolute right-1 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-600 pointer-events-none group-focus-within:text-black dark:group-focus-within:text-white transition-colors duration-300">
           <ChevronDown size={12} strokeWidth={2} />
         </div>

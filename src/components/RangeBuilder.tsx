@@ -21,6 +21,7 @@ import semver from "semver";
 import type { Translation } from "../services/i18n";
 import type { VersionRange } from "../types";
 
+import InputClearButton from "./InputClearButton";
 import MinorsMenu from "./MinorsMenu";
 import RangeRow from "./RangeRow";
 
@@ -220,14 +221,23 @@ const RangeBuilder: React.FC<RangeBuilderProps> = ({
         </label>
 
         <div className="flex gap-2 mb-2">
-          <input
-            type="text"
-            value={quickPackage}
-            onChange={(e) => setQuickPackage(e.target.value)}
-            placeholder={t.pkgPlaceholder}
-            disabled={disabled}
-            className="flex-1 h-9 px-3 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-sm focus:border-black dark:focus:border-white focus:ring-0 outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-600 font-medium text-black dark:text-white disabled:bg-neutral-100 dark:disabled:bg-neutral-800 disabled:cursor-not-allowed transition-colors duration-300"
-          />
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={quickPackage}
+              onChange={(e) => setQuickPackage(e.target.value)}
+              placeholder={t.pkgPlaceholder}
+              disabled={disabled}
+              className="w-full h-9 pl-3 pr-8 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-sm focus:border-black dark:focus:border-white focus:ring-0 outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-600 font-medium text-black dark:text-white disabled:bg-neutral-100 dark:disabled:bg-neutral-800 disabled:cursor-not-allowed transition-colors duration-300"
+            />
+            {quickPackage && !disabled && (
+              <InputClearButton
+                className="right-2"
+                label={t.clearInput}
+                onClick={() => setQuickPackage("")}
+              />
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button

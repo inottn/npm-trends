@@ -39,6 +39,7 @@ export interface Translation {
   chartDownloads: string;
   // VersionSelect
   noVersions: string;
+  clearInput: string;
   // Dropdown options
   optionAll: string;
   // Share
@@ -83,6 +84,7 @@ export const dictionary: Record<Language, Translation> = {
     chartTitle: "Downloads Distribution (7D)",
     chartDownloads: "Downloads",
     noVersions: "No matching versions",
+    clearInput: "Clear input",
     optionAll: "All",
     shareLinkBtn: "Share Link",
     shareLinkCopied: "Link copied!",
@@ -123,6 +125,7 @@ export const dictionary: Record<Language, Translation> = {
     chartTitle: "下载量分布 (7天)",
     chartDownloads: "下载量",
     noVersions: "无匹配版本",
+    clearInput: "清空输入",
     optionAll: "全部",
     shareLinkBtn: "分享链接",
     shareLinkCopied: "链接已复制！",
